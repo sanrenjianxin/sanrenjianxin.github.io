@@ -24,7 +24,7 @@
 <meta property="og:description" content="lc28. 找出字符串中第一个匹配项的下标（中等）-kmp算法详解给你两个字符串 haystack 和 needle ，请你在 haystack 字符串中找出 needle 字符串的第一个匹配项的下标（下标从 0 开始）。如果 needle 不是 haystack 的一部分，则返回  -1 。 示例 1： 输入：haystack &#x3D; “sadbutsad”, needle &#x3D;">
 <meta property="og:locale" content="zh_CN">
 <meta property="article:published_time" content="2022-09-27T13:05:11.000Z">
-<meta property="article:modified_time" content="2022-09-27T15:25:22.153Z">
+<meta property="article:modified_time" content="2022-09-30T14:50:07.101Z">
 <meta property="article:author" content="Li Ruitong">
 <meta property="article:tag" content="kmp">
 <meta property="article:tag" content="动态规划">
@@ -324,19 +324,7 @@
 </tbody></table>
 <p>为什么求最长相等前后缀就可以得到next数组呢？回到前面的例子。回溯j&#x3D;0不行的原因其实是由于aac串子串aa中存在相等的前后缀a，回溯j&#x3D;0会使我们漏掉文本串中已经匹配的a，此时我们将移动至1（即最长相等前后缀中前缀的下一个位置）就能使已经匹配的信息继续保持匹配。         </p>
 <p>接下来就是怎么实现求next[i]的问题了。这里结合代码进行讲解。</p>
-<pre><code class="hljs">public void get_next(int[] next, String needle)&#123;
-    int j = 0;
-    for(int i = 1; i &lt; needle.length(); ++i)&#123;
-        while(j &gt; 0 &amp;&amp; needle.charAt(i) != needle.charAt(j))&#123;
-            j = next[j - 1];//2.这里是最难理解的
-        &#125;
-        if(needle.charAt(i) == needle.charAt(j))&#123;
-            j++;//1.
-        &#125;
-        next[i] = j;
-    &#125;
-&#125;
-</code></pre>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">get_next</span><span class="hljs-params">(<span class="hljs-type">int</span>[] next, String needle)</span>&#123;<br>    <span class="hljs-type">int</span> <span class="hljs-variable">j</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>    <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>; i &lt; needle.length(); ++i)&#123;<br>        <span class="hljs-keyword">while</span>(j &gt; <span class="hljs-number">0</span> &amp;&amp; needle.charAt(i) != needle.charAt(j))&#123;<br>            j = next[j - <span class="hljs-number">1</span>];<span class="hljs-comment">//2.这里是最难理解的</span><br>        &#125;<br>        <span class="hljs-keyword">if</span>(needle.charAt(i) == needle.charAt(j))&#123;<br>            j++;<span class="hljs-comment">//1.</span><br>        &#125;<br>        next[i] = j;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 <p>这里的i相当于上方表格中的j，needle[0-i]也就代表了模块串的每一个子串。而这里的j代表当前字符串最长相等前后缀长度（也是其前缀下标+1）。</p>
 <p>从i&#x3D;1开始，当needle[i]&#x3D;&#x3D;needle[j]时我们就让j++，并且i++。显然，若是一直相等下去，那么两个指针一直同时移动，随着i++，next也就++，j则一直标记着最长相等前后缀长度（也是其前缀下标+1）的位置。也就是1.处代码的含义。</p>
 <p>那么当needle[i]&#x3D;&#x3D;needle[j]，显然我们要将j回退到一个地方，那么回退到哪里呢。这里有一点动态规划的思想，利用先前求好的状态来求当前状态。也是实现部分最难理解最抽象的地方。即j &#x3D; next[j-1]这行代码。</p>
@@ -387,39 +375,8 @@
 <p>当i，j处于此处时模式串失配。令j回溯至某个位置并且i不变。听起来是不是有点耳熟。是的，这其实就是之前文本串和模式串匹配时我们的思路。那时的文本串就是此时的模式串，而模式串就是字串abaab。按照之前的想法，我们应该让j&#x3D;next[j-1]来避免错过已匹配字符。不断执行这条语句直到needle[i]&#x3D;&#x3D;needle[j]，此时的j1就是相等前缀的位置了。</p>
 <p>当我们得到了next[i]之后，接下来的事就简单了。在此不赘述。</p>
 <p>代码：</p>
-<pre><code class="hljs">class Solution &#123;
-    public int strStr(String haystack, String needle) &#123;
-        int[] next = new int[needle.length()];
-        get_next(next, needle);
-        for(int i = 0, j = 0; i &lt; haystack.length(); ++i)&#123;
-            while(j &gt; 0 &amp;&amp; haystack.charAt(i) != needle.charAt(j))&#123;
-                j = next[j - 1];
-            &#125;
-            if(haystack.charAt(i) == needle.charAt(j))&#123;
-                j++;
-            &#125;
-            if(j == needle.length())&#123;
-                return i - needle.length() + 1;
-            &#125;
-        &#125;
-        
-        return -1;
-    &#125;
+<figure class="highlight java"><table><tr><td class="gutter"><pre><span class="line">1</span><br><span class="line">2</span><br><span class="line">3</span><br><span class="line">4</span><br><span class="line">5</span><br><span class="line">6</span><br><span class="line">7</span><br><span class="line">8</span><br><span class="line">9</span><br><span class="line">10</span><br><span class="line">11</span><br><span class="line">12</span><br><span class="line">13</span><br><span class="line">14</span><br><span class="line">15</span><br><span class="line">16</span><br><span class="line">17</span><br><span class="line">18</span><br><span class="line">19</span><br><span class="line">20</span><br><span class="line">21</span><br><span class="line">22</span><br><span class="line">23</span><br><span class="line">24</span><br><span class="line">25</span><br><span class="line">26</span><br><span class="line">27</span><br><span class="line">28</span><br><span class="line">29</span><br><span class="line">30</span><br><span class="line">31</span><br><span class="line">32</span><br></pre></td><td class="code"><pre><code class="hljs java"><span class="hljs-keyword">class</span> <span class="hljs-title class_">Solution</span> &#123;<br>    <span class="hljs-keyword">public</span> <span class="hljs-type">int</span> <span class="hljs-title function_">strStr</span><span class="hljs-params">(String haystack, String needle)</span> &#123;<br>        <span class="hljs-type">int</span>[] next = <span class="hljs-keyword">new</span> <span class="hljs-title class_">int</span>[needle.length()];<br>        get_next(next, needle);<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>, j = <span class="hljs-number">0</span>; i &lt; haystack.length(); ++i)&#123;<br>            <span class="hljs-keyword">while</span>(j &gt; <span class="hljs-number">0</span> &amp;&amp; haystack.charAt(i) != needle.charAt(j))&#123;<br>                j = next[j - <span class="hljs-number">1</span>];<br>            &#125;<br>            <span class="hljs-keyword">if</span>(haystack.charAt(i) == needle.charAt(j))&#123;<br>                j++;<br>            &#125;<br>            <span class="hljs-keyword">if</span>(j == needle.length())&#123;<br>                <span class="hljs-keyword">return</span> i - needle.length() + <span class="hljs-number">1</span>;<br>            &#125;<br>        &#125;<br>        <br>        <span class="hljs-keyword">return</span> -<span class="hljs-number">1</span>;<br>    &#125;<br><br>    <span class="hljs-keyword">public</span> <span class="hljs-keyword">void</span> <span class="hljs-title function_">get_next</span><span class="hljs-params">(<span class="hljs-type">int</span>[] next, String needle)</span>&#123;<br>        <span class="hljs-type">int</span> <span class="hljs-variable">j</span> <span class="hljs-operator">=</span> <span class="hljs-number">0</span>;<br>        <span class="hljs-keyword">for</span>(<span class="hljs-type">int</span> <span class="hljs-variable">i</span> <span class="hljs-operator">=</span> <span class="hljs-number">1</span>; i &lt; needle.length(); ++i)&#123;<br>            <span class="hljs-keyword">while</span>(j &gt; <span class="hljs-number">0</span> &amp;&amp; needle.charAt(i) != needle.charAt(j))&#123;<br>                j = next[j - <span class="hljs-number">1</span>];<br>            &#125;<br>            <span class="hljs-keyword">if</span>(needle.charAt(i) == needle.charAt(j))&#123;<br>                j++;<br>            &#125;<br>            next[i] = j;<br>        &#125;<br>    &#125;<br>&#125;<br></code></pre></td></tr></table></figure>
 
-    public void get_next(int[] next, String needle)&#123;
-        int j = 0;
-        for(int i = 1; i &lt; needle.length(); ++i)&#123;
-            while(j &gt; 0 &amp;&amp; needle.charAt(i) != needle.charAt(j))&#123;
-                j = next[j - 1];
-            &#125;
-            if(needle.charAt(i) == needle.charAt(j))&#123;
-                j++;
-            &#125;
-            next[i] = j;
-        &#125;
-    &#125;
-&#125;
-</code></pre>
 <p>​  </p>
 
                 
